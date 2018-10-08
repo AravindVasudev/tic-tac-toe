@@ -1,5 +1,10 @@
 @import 'constants';
 
 body {
-    background: $background-color;
+    // Size
+    height: 100%;
+    width: 100%;
+
+    // Style
+    background: $background;
 }

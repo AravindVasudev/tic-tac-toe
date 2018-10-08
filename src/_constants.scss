@@ -2,12 +2,32 @@
  * Defaults
  */
 
-$background-color: #f39b6d;
+$background: #f5f5f5 url('./assets/images/bg.png') repeat top left;
+$material-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); 
 
 /*
  * App Component
  */
 
-$app-height: 60vh;
-$app-width: 60vw;
+$app-height: 70vh;
+$app-width: 70vh;
 $app-background: #ffffff;
+
+$row-height: calc(100% / 3);
+$row-width: 100%;
+
+$cell-height: 100%;
+$cell-width: calc(100% / 3);
+
+$cell-border-size: 2px;
+$cell-border-style: dashed;
+$cell-border-color: #1b1f3b;
+
+$cell-font-family: monospace;
+$cell-font-size: 8em;
+
+$x-background: #1098f7;
+$x-color: #1b1f3b;
+
+$o-background: #c1292e;
+$o-color: #4c191b;

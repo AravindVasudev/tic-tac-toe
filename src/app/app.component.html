@@ -1,1 +1,8 @@
-<div id="app"></div>
+<div id="app">
+    <div *ngFor="let row of board; let i=index" class="row">
+        <div *ngFor="let cell of row; let j=index" class="cell" (click)="move(i, j)"
+        [class.empty]="cell == 0" [class.x]="cell == 1" [class.o]="cell == 2">
+            {{ boardIcons[cell] }}
+        </div>
+    </div>
+</div>

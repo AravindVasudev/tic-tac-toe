@@ -11,4 +11,49 @@
 
     //Design
     background: $app-background;
+    box-shadow: $material-box-shadow;
+
+    //Alignment
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.row {
+    //Size
+    height: $row-height;
+    width: $row-width;
+}
+
+.cell {
+    //Size
+    height: $cell-height;
+    width: $cell-width;
+
+    //Alignment
+    float: left;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    //Design
+    outline: $cell-border-size $cell-border-style $cell-border-color;
+    user-select: none;
+
+    font-family: $cell-font-family;
+    font-size: $cell-font-size;
+}
+
+.empty {}
+
+.x {
+    background: $x-background;
+    color: $x-color;
+}
+
+.o {
+    background: $o-background;
+    color: $o-color;
 }
