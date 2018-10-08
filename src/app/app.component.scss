@@ -1,0 +1,14 @@
+@import '../constants';
+
+#app {
+    //Resets
+    margin: 0;
+    padding: 0;
+
+    //Size
+    height: $app-height;
+    width: $app-width;
+
+    //Design
+    background: $app-background;
+}
