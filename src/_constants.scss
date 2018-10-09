@@ -13,11 +13,13 @@ $app-height: 70vh;
 $app-width: 70vh;
 $app-background: #ffffff;
 
-$row-height: calc(100% / 3);
+$board-size: 3;
+
+$row-height: 100% / $board-size;
 $row-width: 100%;
 
 $cell-height: 100%;
-$cell-width: calc(100% / 3);
+$cell-width: 100% / $board-size;
 
 $cell-border-size: 2px;
 $cell-border-style: dashed;
