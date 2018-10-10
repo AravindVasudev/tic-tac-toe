@@ -46,7 +46,9 @@
     font-size: $cell-font-size;
 }
 
-.empty {}
+.empty {
+    background: $empty-background;
+}
 
 .x {
     background: $x-background;

@@ -98,8 +98,10 @@ export class AppComponent {
     let freeSpaces: [number, number][] = this.getFreeSpaces();
     let move: number = Math.floor(Math.random() * freeSpaces.length);
 
-    this.board[freeSpaces[move][0]][freeSpaces[move][1]] = this.bot;
-
+    if (freeSpaces.length) {
+      this.board[freeSpaces[move][0]][freeSpaces[move][1]] = this.bot;
+    }
+    
     if (this.hasWon()) {
       this.fillBoard(this.boardSize, this.bot);
       return;
