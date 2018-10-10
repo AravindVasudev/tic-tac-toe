@@ -40,12 +40,12 @@ export class AppComponent {
     }
   }
 
-  getFreeSpaces(): [number, number][] {
+  getFreeSpaces(board = this.board): [number, number][] {
     let freeSpaces: [number, number][] = [];
 
-    for (let i = 0; i < this.board.length; i++) {
-      for (let j = 0; j < this.board[0].length; j++) {
-        if (this.board[i][j] === this.empty) {
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[0].length; j++) {
+        if (board[i][j] === this.empty) {
           freeSpaces.push([i, j]);
         }
       }
@@ -54,21 +54,17 @@ export class AppComponent {
     return freeSpaces;
   }
 
-  hasWon(): boolean {
+  hasWon(player: number, board = this.board): boolean {
     // row check
-    let rowCheck: boolean = this.board.map(row =>
-        row[0] != this.empty && row.every(cell => cell == row[0])).includes(true);
+    let rowCheck: boolean = board.map(row =>
+        row.every(cell => cell == player)).includes(true);
 
     // column check
     let columnCheck = false;
-    for (let i = 0; i < this.board.length; i++) {
-      if (this.board[0][i] == this.empty) {
-        continue;
-      }
-
+    for (let i = 0; i < board.length; i++) {
       let won = true;
-      for (let j = 0; j < this.board[0].length; j++) {
-        won = this.board[0][i] == this.board[j][i];
+      for (let j = 0; j < board[0].length; j++) {
+        won = player == board[j][i];
         if (!won) {
           break;
         }
@@ -78,33 +74,110 @@ export class AppComponent {
         columnCheck = true;
         break;
       }
-    }
+    } 
 
     // diagonal check
-    let leftDiagonalCheck = this.board[0][0] != this.empty;
-    for (let i = 1; i < this.board.length && leftDiagonalCheck; i++) {
-      leftDiagonalCheck = this.board[0][0] == this.board[i][i];
+    let leftDiagonalCheck = true;
+    let rightDiagonalCheck = true;
+    for (let i = 0, j = board.length - 1; i < board.length; i++, j--) {
+      leftDiagonalCheck = player == board[i][i];
+      rightDiagonalCheck = player == board[i][j];
+
+      if (!leftDiagonalCheck && !rightDiagonalCheck) {
+        break;
+      }
     }
 
-    let rightDiagonalCheck = this.board[0][this.board.length - 1] != this.empty;
-    for (let i = 0, j = this.board.length - 1; i < this.board.length && rightDiagonalCheck; i++, j--) {
-      rightDiagonalCheck = this.board[0][this.board.length - 1] == this.board[i][j];
-    }
-
+    console.log(rowCheck, columnCheck, leftDiagonalCheck, rightDiagonalCheck);
     return rowCheck || columnCheck || leftDiagonalCheck || rightDiagonalCheck;
   }
 
-  moveBot(): void {
-    let freeSpaces: [number, number][] = this.getFreeSpaces();
-    let move: number = Math.floor(Math.random() * freeSpaces.length);
-
-    if (freeSpaces.length) {
-      this.board[freeSpaces[move][0]][freeSpaces[move][1]] = this.bot;
+  hasWon3By3(player: number, board = this.board): boolean {
+    if
+    ((board[0][0] === player && board[0][1] === player && board[0][2] === player) ||
+    (board[1][0] === player && board[1][1] === player && board[1][2] === player) ||
+    (board[2][0] === player && board[2][1] === player && board[2][2] === player) ||
+    (board[0][0] === player && board[1][0] === player && board[2][0] === player) ||
+    (board[0][1] === player && board[1][1] === player && board[2][1] === player) ||
+    (board[0][2] === player && board[1][2] === player && board[2][2] === player) ||
+    (board[0][0] === player && board[1][1] === player && board[2][2] === player) ||
+    (board[0][2] === player && board[1][1] === player && board[2][0] === player)) {
+      return true;
     }
-    
-    if (this.hasWon()) {
+
+    return false;
+  }
+
+  minimax(curBoard, curPlayer): [number, [number, number]] {
+    // Player won
+    if (this.hasWon3By3(this.player, curBoard)) {
+      return [-10, null];
+    }
+
+    // Bot won
+    if (this.hasWon3By3(this.bot, curBoard)) {
+      return [10, null];
+    }
+
+    let freeSpaces: [number, number][] = this.getFreeSpaces(curBoard);
+    if (!freeSpaces.length) { // Tie
+      return [0, null];
+    }
+
+    // get all possible moves with their respective scores
+    let moves: [number, [number, number]][] = [];
+    for (let i = 0; i < freeSpaces.length; i++) {
+      // move player to current free space
+      curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = curPlayer;
+      
+      // add next move to the moves array
+      let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot);
+      move[1] = freeSpaces[i];
+
+      moves.push(move);
+
+      // reset board
+      curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = this.empty;
+    }
+
+    // choose the next move
+    let bestMove: number;
+    if (curPlayer === this.bot) { // Maximizer
+      let bestScore = -10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i][0] > bestScore) {
+          bestScore = moves[i][0];
+          bestMove = i;
+        }
+      }
+    } else { // Minimizer
+      let bestScore = 10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i][0] < bestScore) {
+          bestScore = moves[i][0];
+          bestMove = i;
+        }
+      }
+    }
+
+    return moves[bestMove];
+  }
+
+  randomMove(player: number): [number, number] {
+    const freeSpaces: [number, number][] = this.getFreeSpaces();
+    return freeSpaces[Math.floor(Math.random() * freeSpaces.length)];
+  }
+
+  moveBot(): void {
+    if (this.getFreeSpaces().length) {
+      let move: [number, number] = this.minimax(this.board, this.bot)[1];
+      this.board[move[0]][move[1]] = this.bot;
+    }
+
+    // Check if the bot has won
+    if (this.hasWon(this.bot)) {
+      console.log(this.board);
       this.fillBoard(this.boardSize, this.bot);
-      return;
     }
   }
 
@@ -116,7 +189,9 @@ export class AppComponent {
 
     this.board[row][col] = this.player; // make player's move
 
-    if (this.hasWon()) {
+    // Check if the player has won
+    if (this.hasWon(this.player)) {
+      console.log(this.board);
       this.fillBoard(this.boardSize, this.player);
       return;
     }
