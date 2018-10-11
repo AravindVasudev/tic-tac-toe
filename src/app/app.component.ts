@@ -55,67 +55,44 @@ export class AppComponent {
   }
 
   hasWon(player: number, board = this.board): boolean {
-    // row check
-    let rowCheck: boolean = board.map(row =>
-        row.every(cell => cell == player)).includes(true);
+    let rowCheck = true;
+    let columnCheck = true;
+    let leftDiagonalCheck = true;
+    let rightDiagonalCheck = true;
 
-    // column check
-    let columnCheck = false;
-    for (let i = 0; i < board.length; i++) {
-      let won = true;
-      for (let j = 0; j < board[0].length; j++) {
-        won = player == board[j][i];
-        if (!won) {
+    for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
+      for (let j = 0; j < board.length; j++) {
+        rowCheck = rowCheck && (player == board[i][j]);
+        columnCheck = columnCheck && (player == board[j][i]);
+
+        if (!(rowCheck || columnCheck)) { // breaks if both the check fails
           break;
         }
       }
 
-      if (won) {
+      // check if diagonals
+      leftDiagonalCheck = leftDiagonalCheck && (player == board[i][i]);
+      rightDiagonalCheck = rightDiagonalCheck && (player == board[i][k]);
+
+      if (rowCheck || columnCheck) {
+        return true;
+      } else {
+        rowCheck = true;
         columnCheck = true;
-        break;
-      }
-    } 
-
-    // diagonal check
-    let leftDiagonalCheck = true;
-    let rightDiagonalCheck = true;
-    for (let i = 0, j = board.length - 1; i < board.length; i++, j--) {
-      leftDiagonalCheck = player == board[i][i];
-      rightDiagonalCheck = player == board[i][j];
-
-      if (!leftDiagonalCheck && !rightDiagonalCheck) {
-        break;
       }
     }
 
-    console.log(rowCheck, columnCheck, leftDiagonalCheck, rightDiagonalCheck);
-    return rowCheck || columnCheck || leftDiagonalCheck || rightDiagonalCheck;
-  }
-
-  hasWon3By3(player: number, board = this.board): boolean {
-    if
-    ((board[0][0] === player && board[0][1] === player && board[0][2] === player) ||
-    (board[1][0] === player && board[1][1] === player && board[1][2] === player) ||
-    (board[2][0] === player && board[2][1] === player && board[2][2] === player) ||
-    (board[0][0] === player && board[1][0] === player && board[2][0] === player) ||
-    (board[0][1] === player && board[1][1] === player && board[2][1] === player) ||
-    (board[0][2] === player && board[1][2] === player && board[2][2] === player) ||
-    (board[0][0] === player && board[1][1] === player && board[2][2] === player) ||
-    (board[0][2] === player && board[1][1] === player && board[2][0] === player)) {
-      return true;
-    }
-
-    return false;
+    return leftDiagonalCheck || rightDiagonalCheck;
   }
 
   minimax(curBoard, curPlayer): [number, [number, number]] {
     // Player won
-    if (this.hasWon3By3(this.player, curBoard)) {
+    if (this.hasWon(this.player, curBoard)) {
       return [-10, null];
     }
 
     // Bot won
-    if (this.hasWon3By3(this.bot, curBoard)) {
+    if (this.hasWon(this.bot, curBoard)) {
       return [10, null];
     }
 
@@ -169,6 +146,7 @@ export class AppComponent {
   }
 
   moveBot(): void {
+    // perform minimax if freeSpace is available
     if (this.getFreeSpaces().length) {
       let move: [number, number] = this.minimax(this.board, this.bot)[1];
       this.board[move[0]][move[1]] = this.bot;
@@ -196,6 +174,9 @@ export class AppComponent {
       return;
     }
 
+    // Bot's move
+    console.time('bot-runtime');
     this.moveBot();
+    console.timeEnd('bot-runtime');
   }
 }
