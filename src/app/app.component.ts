@@ -70,7 +70,7 @@ export class AppComponent {
         }
       }
 
-      // check if diagonals
+      // check diagonals
       leftDiagonalCheck = leftDiagonalCheck && (player == board[i][i]);
       rightDiagonalCheck = rightDiagonalCheck && (player == board[i][k]);
 
