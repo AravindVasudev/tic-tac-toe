@@ -101,43 +101,32 @@ export class AppComponent {
       return [0, null];
     }
 
-    // get all possible moves with their respective scores
-    let moves: [number, [number, number]][] = [];
+    // Pick the next possible moves
+    let bestMove: [number, [number, number]] = [curPlayer === this.bot ? 
+      Number.MIN_SAFE_INTEGER : Number.MAX_SAFE_INTEGER, null];
     for (let i = 0; i < freeSpaces.length; i++) {
       // move player to current free space
       curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = curPlayer;
       
-      // add next move to the moves array
+      // get the best move for the current free space
       let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot);
       move[1] = freeSpaces[i];
 
-      moves.push(move);
+      if (curPlayer === this.bot) {
+        if (bestMove[0] < move[0]) {
+          bestMove = move;
+        }
+      } else {
+        if (bestMove[0] > move[0]) {
+          bestMove = move;
+        }
+      }
 
       // reset board
       curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = this.empty;
     }
 
-    // choose the next move
-    let bestMove: number;
-    if (curPlayer === this.bot) { // Maximizer
-      let bestScore = -10000;
-      for (let i = 0; i < moves.length; i++) {
-        if (moves[i][0] > bestScore) {
-          bestScore = moves[i][0];
-          bestMove = i;
-        }
-      }
-    } else { // Minimizer
-      let bestScore = 10000;
-      for (let i = 0; i < moves.length; i++) {
-        if (moves[i][0] < bestScore) {
-          bestScore = moves[i][0];
-          bestMove = i;
-        }
-      }
-    }
-
-    return moves[bestMove];
+    return bestMove;
   }
 
   randomMove(player: number): [number, number] {
