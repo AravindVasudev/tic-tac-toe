@@ -85,7 +85,8 @@ export class AppComponent {
     return leftDiagonalCheck || rightDiagonalCheck;
   }
 
-  minimax(curBoard, curPlayer): [number, [number, number]] {
+  minimax(curBoard: number[][], curPlayer: number, alpha = Number.MIN_SAFE_INTEGER,
+    beta = Number.MAX_SAFE_INTEGER): [number, [number, number]] {
     // Player won
     if (this.hasWon(this.player, curBoard)) {
       return [-10, null];
@@ -109,16 +110,28 @@ export class AppComponent {
       curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = curPlayer;
       
       // get the best move for the current free space
-      let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot);
+      let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot, alpha, beta);
       move[1] = freeSpaces[i];
 
       if (curPlayer === this.bot) {
         if (bestMove[0] < move[0]) {
           bestMove = move;
         }
+        
+        alpha = Math.max(alpha, move[0]);
+        if (beta <= alpha) { // α-β pruning
+          curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = this.empty;
+          break;
+        }
       } else {
         if (bestMove[0] > move[0]) {
           bestMove = move;
+        }
+
+        beta = Math.min(beta, move[0]);
+        if (beta <= alpha) { // α-β pruning
+          curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = this.empty;
+          break;
         }
       }
 
@@ -137,7 +150,9 @@ export class AppComponent {
   moveBot(): void {
     // perform minimax if freeSpace is available
     if (this.getFreeSpaces().length) {
+      console.time('bot-runtime');
       let move: [number, number] = this.minimax(this.board, this.bot)[1];
+      console.timeEnd('bot-runtime');
       this.board[move[0]][move[1]] = this.bot;
     }
 
@@ -164,8 +179,6 @@ export class AppComponent {
     }
 
     // Bot's move
-    console.time('bot-runtime');
     this.moveBot();
-    console.timeEnd('bot-runtime');
   }
 }
