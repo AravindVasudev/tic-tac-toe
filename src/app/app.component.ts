@@ -85,38 +85,49 @@ export class AppComponent {
     return leftDiagonalCheck || rightDiagonalCheck;
   }
 
-  winningHeuristics(player: number, board: number[][]): number {
-    let rowCheck = true;
-    let columnCheck = true;
-    let leftDiagonalCheck = true;
-    let rightDiagonalCheck = true;
-
-    let score = 0;
-    for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
-      for (let j = 0; j < board.length; j++) {
-        rowCheck = rowCheck && (player === board[i][j] || this.empty === board[i][j]);
-        columnCheck = columnCheck && (player === board[j][i] || this.empty === board[j][i]);
-
-        if (!(rowCheck || columnCheck)) { // breaks if both the check fails
-          break;
-        }
-      }
-
-      // check diagonals
-      leftDiagonalCheck = leftDiagonalCheck && (player === board[i][i] || this.empty === board[i][i]);
-      rightDiagonalCheck = rightDiagonalCheck && (player === board[i][k] || this.empty === board[i][k]);
-
-      rowCheck && score++;
-      columnCheck && score++;
-
-      rowCheck = true;
-      columnCheck = true;
+  fitness(playerMoveCount: number, opponentMoveCount: number): number {
+    if (playerMoveCount > 0 && opponentMoveCount === 0) {
+      return playerMoveCount;
     }
 
-    leftDiagonalCheck && score++;
-    rightDiagonalCheck && score++;
+    if (opponentMoveCount > 0 && playerMoveCount === 0) {
+      return opponentMoveCount;
+    }
 
     return 0;
+  }
+
+  winningHeuristics(player: number, board: number[][]): number {
+    let opponent = this.opponent(player);
+
+    let playerLeftDiagonalCount = 0;
+    let opponentLeftDiagonalCount = 0;
+    let playerRightDiagonalCount = 0;
+    let opponentRightDiagonalCount = 0;
+
+    let fitness = 0;
+    for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
+      let playerMoveCount = 0;
+      let opponentMoveCount = 0;
+      
+      for (let j = 0; j < board.length; j++) {
+        board[i][j] === player && playerMoveCount++;
+        board[i][j] === opponent && opponentMoveCount++;
+      }
+
+      fitness += this.fitness(playerMoveCount, opponentMoveCount);
+
+      board[i][i] === player && playerLeftDiagonalCount++;
+      board[i][i] === opponent && opponentLeftDiagonalCount++;
+
+      board[i][k] === player && playerRightDiagonalCount++;
+      board[i][k] === opponent && opponentRightDiagonalCount++;
+    }
+
+    fitness += this.fitness(playerLeftDiagonalCount, opponentLeftDiagonalCount);
+    fitness += this.fitness(playerRightDiagonalCount, opponentRightDiagonalCount);
+
+    return fitness;
   }
 
   opponent(player: number): number {
@@ -127,12 +138,12 @@ export class AppComponent {
     beta = Number.MAX_SAFE_INTEGER): [number, [number, number]] {
     // Player won
     if (this.hasWon(this.player, curBoard)) {
-      return [-1, null];
+      return [-10 - depth, null];
     }
 
     // Bot won
     if (this.hasWon(this.bot, curBoard)) {
-      return [1, null];
+      return [10 + depth, null];
     }
 
     let freeSpaces: [number, number][] = this.getFreeSpaces(curBoard);
@@ -202,6 +213,7 @@ export class AppComponent {
     // Check if the bot has won
     if (this.hasWon(this.bot)) {
       console.log(this.board);
+      console.log(this.bot);
       this.fillBoard(this.boardSize, this.bot);
     }
   }
@@ -217,6 +229,7 @@ export class AppComponent {
     // Check if the player has won
     if (this.hasWon(this.player)) {
       console.log(this.board);
+      console.log(this.bot);
       this.fillBoard(this.boardSize, this.player);
       return;
     }
