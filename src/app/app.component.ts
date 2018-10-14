@@ -62,8 +62,8 @@ export class AppComponent {
 
     for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
       for (let j = 0; j < board.length; j++) {
-        rowCheck = rowCheck && (player == board[i][j]);
-        columnCheck = columnCheck && (player == board[j][i]);
+        rowCheck = rowCheck && (player === board[i][j]);
+        columnCheck = columnCheck && (player === board[j][i]);
 
         if (!(rowCheck || columnCheck)) { // breaks if both the check fails
           break;
@@ -71,8 +71,8 @@ export class AppComponent {
       }
 
       // check diagonals
-      leftDiagonalCheck = leftDiagonalCheck && (player == board[i][i]);
-      rightDiagonalCheck = rightDiagonalCheck && (player == board[i][k]);
+      leftDiagonalCheck = leftDiagonalCheck && (player === board[i][i]);
+      rightDiagonalCheck = rightDiagonalCheck && (player === board[i][k]);
 
       if (rowCheck || columnCheck) {
         return true;
@@ -85,21 +85,64 @@ export class AppComponent {
     return leftDiagonalCheck || rightDiagonalCheck;
   }
 
-  minimax(curBoard: number[][], curPlayer: number, alpha = Number.MIN_SAFE_INTEGER,
+  winningHeuristics(player: number, board: number[][]): number {
+    let rowCheck = true;
+    let columnCheck = true;
+    let leftDiagonalCheck = true;
+    let rightDiagonalCheck = true;
+
+    let score = 0;
+    for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
+      for (let j = 0; j < board.length; j++) {
+        rowCheck = rowCheck && (player === board[i][j] || this.empty === board[i][j]);
+        columnCheck = columnCheck && (player === board[j][i] || this.empty === board[j][i]);
+
+        if (!(rowCheck || columnCheck)) { // breaks if both the check fails
+          break;
+        }
+      }
+
+      // check diagonals
+      leftDiagonalCheck = leftDiagonalCheck && (player === board[i][i] || this.empty === board[i][i]);
+      rightDiagonalCheck = rightDiagonalCheck && (player === board[i][k] || this.empty === board[i][k]);
+
+      rowCheck && score++;
+      columnCheck && score++;
+
+      rowCheck = true;
+      columnCheck = true;
+    }
+
+    leftDiagonalCheck && score++;
+    rightDiagonalCheck && score++;
+
+    return 0;
+  }
+
+  opponent(player: number): number {
+    return player == this.player ? this.bot : this.player;
+  }
+
+  minimax(curBoard: number[][], curPlayer: number, depth = 3, alpha = Number.MIN_SAFE_INTEGER,
     beta = Number.MAX_SAFE_INTEGER): [number, [number, number]] {
     // Player won
     if (this.hasWon(this.player, curBoard)) {
-      return [-10, null];
+      return [-1, null];
     }
 
     // Bot won
     if (this.hasWon(this.bot, curBoard)) {
-      return [10, null];
+      return [1, null];
     }
 
     let freeSpaces: [number, number][] = this.getFreeSpaces(curBoard);
     if (!freeSpaces.length) { // Tie
       return [0, null];
+    }
+
+    // Depth limit
+    if (!depth) {
+      return [this.winningHeuristics(curPlayer, curBoard), null];
     }
 
     // Pick the next possible moves
@@ -110,7 +153,7 @@ export class AppComponent {
       curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = curPlayer;
       
       // get the best move for the current free space
-      let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot, alpha, beta);
+      let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot, depth - 1, alpha, beta);
       move[1] = freeSpaces[i];
 
       if (curPlayer === this.bot) {
