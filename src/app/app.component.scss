@@ -59,3 +59,10 @@
     background: $o-background;
     color: $o-color;
 }
+
+@media only screen and (max-width: 768px) {
+    #app {
+        width: 100%;
+        height: 100%;
+    }
+}
