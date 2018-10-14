@@ -5,3 +5,4 @@ An N ✕ N Tic Tac Toe game with an AI opponent build with minimax algorithm, α
 
 ## Usage
 [https://aravindvasudev.github.io/tic-tac-toe/N](https://aravindvasudev.github.io/tic-tac-toe/N) - change N value to desired board size. (Default: 3)
+X & O player are picked randomly.
