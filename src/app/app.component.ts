@@ -87,11 +87,11 @@ export class AppComponent {
 
   fitness(playerMoveCount: number, opponentMoveCount: number): number {
     if (playerMoveCount > 0 && opponentMoveCount === 0) {
-      return playerMoveCount;
+      return playerMoveCount * playerMoveCount;
     }
 
     if (opponentMoveCount > 0 && playerMoveCount === 0) {
-      return opponentMoveCount;
+      return -1 * opponentMoveCount * opponentMoveCount;
     }
 
     return 0;
@@ -107,15 +107,21 @@ export class AppComponent {
 
     let fitness = 0;
     for (let i = 0, k = board.length - 1; i < board.length; i++, k--) {
-      let playerMoveCount = 0;
-      let opponentMoveCount = 0;
+      let playerRowCount = 0;
+      let opponentRowCount = 0;
+      let playerColumnCount = 0;
+      let opponentColumnCount = 0;
       
       for (let j = 0; j < board.length; j++) {
-        board[i][j] === player && playerMoveCount++;
-        board[i][j] === opponent && opponentMoveCount++;
+        board[i][j] === player && playerRowCount++;
+        board[i][j] === opponent && opponentRowCount++;
+
+        board[j][i] === player && playerColumnCount++;
+        board[j][i] === opponent && opponentColumnCount++;
       }
 
-      fitness += this.fitness(playerMoveCount, opponentMoveCount);
+      fitness += this.fitness(playerRowCount, opponentRowCount);
+      fitness += this.fitness(playerColumnCount, opponentColumnCount);
 
       board[i][i] === player && playerLeftDiagonalCount++;
       board[i][i] === opponent && opponentLeftDiagonalCount++;
@@ -134,16 +140,16 @@ export class AppComponent {
     return player == this.player ? this.bot : this.player;
   }
 
-  minimax(curBoard: number[][], curPlayer: number, depth = 3, alpha = Number.MIN_SAFE_INTEGER,
+  minimax(curBoard: number[][], curPlayer: number, depth = 4, alpha = Number.MIN_SAFE_INTEGER,
     beta = Number.MAX_SAFE_INTEGER): [number, [number, number]] {
     // Player won
     if (this.hasWon(this.player, curBoard)) {
-      return [-10 - depth, null];
+      return [-10000 - depth, null];
     }
 
     // Bot won
     if (this.hasWon(this.bot, curBoard)) {
-      return [10 + depth, null];
+      return [10000 + depth, null];
     }
 
     let freeSpaces: [number, number][] = this.getFreeSpaces(curBoard);
