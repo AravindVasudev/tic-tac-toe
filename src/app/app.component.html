@@ -1,7 +1,8 @@
 <div id="app">
-    <div *ngFor="let row of board; let i=index" class="row">
+    <div *ngFor="let row of board; let i=index" class="row" [style.height.%]="100 / boardSize">
         <div *ngFor="let cell of row; let j=index" class="cell" (click)="move(i, j)"
-        [class.empty]="cell == 0" [class.x]="cell == 1" [class.o]="cell == 2">
+        [class.empty]="cell == 0" [class.x]="cell == 1" [class.o]="cell == 2"
+        [style.width.%]="100 / boardSize" [style.fontSize.em]="24 / boardSize">
             {{ boardIcons[cell] }}
         </div>
     </div>

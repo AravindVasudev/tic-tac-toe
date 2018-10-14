@@ -15,6 +15,17 @@ export class AppComponent {
   boardSize: number = 3;
 
   constructor() {
+    let lastUrlParam = parseInt(window.location.href.split('/').pop());
+    if (lastUrlParam) {
+      if (lastUrlParam < 3) {
+        lastUrlParam = 3;
+      } else if (lastUrlParam > 10) {
+        lastUrlParam = 10;
+      }
+
+      this.boardSize = lastUrlParam;
+    }
+
     // Init board
     this.fillBoard(this.boardSize, this.empty);
 
@@ -33,7 +44,7 @@ export class AppComponent {
     }
   }
 
-  fillBoard(dimension: number, value: number): void {
+  fillBoard(dimension: number, value = this.empty): void {
     this.board = new Array(dimension);
     for (let i = 0; i < dimension; i++) {
       this.board[i] = new Array(dimension).fill(value);
