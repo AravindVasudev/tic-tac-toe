@@ -15,6 +15,7 @@ export class AppComponent {
   boardSize: number = 3;
 
   constructor() {
+    // use board size if passed as last url param
     let lastUrlParam = parseInt(window.location.href.split('/').pop());
     if (lastUrlParam) {
       if (lastUrlParam < 3) {
@@ -44,6 +45,7 @@ export class AppComponent {
     }
   }
 
+  // create a empty board of specified dimension
   fillBoard(dimension: number, value = this.empty): void {
     this.board = new Array(dimension);
     for (let i = 0; i < dimension; i++) {
@@ -51,6 +53,7 @@ export class AppComponent {
     }
   }
 
+  // returns all available free space in the board
   getFreeSpaces(board = this.board): [number, number][] {
     let freeSpaces: [number, number][] = [];
 
@@ -65,6 +68,7 @@ export class AppComponent {
     return freeSpaces;
   }
 
+  // check if the given player has won
   hasWon(player: number, board = this.board): boolean {
     let rowCheck = true;
     let columnCheck = true;
@@ -96,6 +100,7 @@ export class AppComponent {
     return leftDiagonalCheck || rightDiagonalCheck;
   }
 
+  // compute fitness for the given move count
   fitness(playerMoveCount: number, opponentMoveCount: number): number {
     if (playerMoveCount > 0 && opponentMoveCount === 0) {
       return playerMoveCount * playerMoveCount;
@@ -108,6 +113,7 @@ export class AppComponent {
     return 0;
   }
 
+  // compute heuristic value for the given board based on number of available winning spots for the player
   winningHeuristics(player: number, board: number[][]): number {
     let opponent = this.opponent(player);
 
@@ -147,18 +153,20 @@ export class AppComponent {
     return fitness;
   }
 
+  // returns opponent of the given player
   opponent(player: number): number {
     return player == this.player ? this.bot : this.player;
   }
 
+  // returns the best move for the given player
   minimax(curBoard: number[][], curPlayer: number, depth = 4, alpha = Number.MIN_SAFE_INTEGER,
     beta = Number.MAX_SAFE_INTEGER): [number, [number, number]] {
-    // Player won
+    // if player won
     if (this.hasWon(this.player, curBoard)) {
       return [-10000 - depth, null];
     }
 
-    // Bot won
+    // if bot won
     if (this.hasWon(this.bot, curBoard)) {
       return [10000 + depth, null];
     }
@@ -173,7 +181,7 @@ export class AppComponent {
       return [this.winningHeuristics(curPlayer, curBoard), null];
     }
 
-    // Pick the next possible moves
+    // Pick the next best move for free spaces
     let bestMove: [number, [number, number]] = [curPlayer === this.bot ? 
       Number.MIN_SAFE_INTEGER : Number.MAX_SAFE_INTEGER, null];
     for (let i = 0; i < freeSpaces.length; i++) {
@@ -184,7 +192,7 @@ export class AppComponent {
       let move = this.minimax(curBoard, curPlayer == this.bot ? this.player : this.bot, depth - 1, alpha, beta);
       move[1] = freeSpaces[i];
 
-      if (curPlayer === this.bot) {
+      if (curPlayer === this.bot) { // Maximizing player
         if (bestMove[0] < move[0]) {
           bestMove = move;
         }
@@ -194,7 +202,7 @@ export class AppComponent {
           curBoard[freeSpaces[i][0]][freeSpaces[i][1]] = this.empty;
           break;
         }
-      } else {
+      } else { // Minimizing player
         if (bestMove[0] > move[0]) {
           bestMove = move;
         }
@@ -213,11 +221,6 @@ export class AppComponent {
     return bestMove;
   }
 
-  randomMove(player: number): [number, number] {
-    const freeSpaces: [number, number][] = this.getFreeSpaces();
-    return freeSpaces[Math.floor(Math.random() * freeSpaces.length)];
-  }
-
   moveBot(): void {
     // perform minimax if freeSpace is available
     if (this.getFreeSpaces().length) {
@@ -231,6 +234,7 @@ export class AppComponent {
     if (this.hasWon(this.bot)) {
       console.log(this.board);
       console.log(this.bot);
+      
       this.fillBoard(this.boardSize, this.bot);
     }
   }
